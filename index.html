@@ -1,1 +1,69 @@
-<div id="671b32369e358ca757d1eaee95f01481" class="ww-informers-box-854753"><p class="ww-informers-box-854754"><a href="https://world-weather.ru/pogoda/russia/abdulino/">Точный прогноз погоды в Абдулино</a><br><a href="https://world-weather.ru/pogoda/russia/kemerovo/">Подробнее о прогнозе</a></p></div><script async type="text/javascript" charset="utf-8" src="https://world-weather.ru/wwinformer.php?userid=671b32369e358ca757d1eaee95f01481"></script><style>.ww-informers-box-854754{-webkit-animation-name:ww-informers54;animation-name:ww-informers54;-webkit-animation-duration:1.5s;animation-duration:1.5s;white-space:nowrap;overflow:hidden;-o-text-overflow:ellipsis;text-overflow:ellipsis;font-size:12px;font-family:Arial;line-height:18px;text-align:center}@-webkit-keyframes ww-informers54{0%,80%{opacity:0}100%{opacity:1}}@keyframes ww-informers54{0%,80%{opacity:0}100%{opacity:1}}</style>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Информер погоды</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+        #weather {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Информер погоды</h1>
+    <div id="weather">Загрузка...</div>
+
+    <script>
+        // Вставьте свой API-ключ Яндекс.Погоды здесь
+        const apiKey = '24559705-12dd-400e-9eb8-ab4f5e6dcc22';
+        
+        // URL для получения данных о погоде (пример для Москвы)
+        const apiUrl = `https://api.weather.yandex.ru/v2/forecast?lat=55.7558&lon=37.6176&lang=ru_RU`;
+
+        // Получаем данные о погоде
+        async function getWeather() {
+            try {
+                const response = await fetch(apiUrl, {
+                    headers: {
+                        'X-Yandex-API-Key': apiKey
+                    }
+                });
+                const data = await response.json();
+                displayWeather(data);
+            } catch (error) {
+                document.getElementById('weather').innerText = 'Не удалось загрузить данные о погоде';
+                console.error('Ошибка при получении данных о погоде:', error);
+            }
+        }
+
+        // Отображаем данные о погоде на странице
+        function displayWeather(data) {
+            const weatherDiv = document.getElementById('weather');
+            const temperature = data.fact.temp;
+            const condition = data.fact.condition;
+            weatherDiv.innerHTML = `Температура: ${temperature}°C<br>Условия: ${condition}`;
+        }
+
+        // Загружаем данные о погоде при загрузке страницы
+        window.onload = getWeather;
+
+        // Интеграция с Telegram Bot Web Apps
+        window.Telegram.WebApp.ready();
+
+        function sendWeatherToTelegram() {
+            Telegram.WebApp.sendData(JSON.stringify({
+                temperature: document.getElementById('weather').innerText
+            }));
+        }
+
+        // Отправляем данные в Telegram при открытии Web App
+        Telegram.WebApp.onEvent('viewportChanged', sendWeatherToTelegram);
+    </script>
+</body>
+</html>
