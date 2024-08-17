@@ -3,67 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Информер погоды</title>
+    <title>Погода</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 50px;
+            background-color: #f0f8ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
         }
         #weather {
-            margin-top: 20px;
+            text-align: center;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            margin: 0 0 10px 0;
         }
     </style>
 </head>
 <body>
-    <h1>Информер погоды</h1>
-    <div id="weather">Загрузка...</div>
+    <div id="weather">
+        <h2>Загрузка...</h2>
+        <p id="description"></p>
+        <p id="temperature"></p>
+    </div>
 
     <script>
-        // Вставьте свой API-ключ Яндекс.Погоды здесь
-        const apiKey = '24559705-12dd-400e-9eb8-ab4f5e6dcc22';
-        
-        // URL для получения данных о погоде (пример для Москвы)
-        const apiUrl = `https://api.weather.yandex.ru/v2/forecast?lat=52.37125&lon=4.89388`;
+        const apiKey = '56b30cb255.3443075';  // Замените ВАШ_API_КЛЮЧ на ваш реальный API-ключ
+        const city = 'Moscow';  // Укажите нужный город
 
-        // Получаем данные о погоде
-        async function getWeather() {
-            try {
-                const response = await fetch(apiUrl, {
-                    headers: {
-                        'X-Yandex-API-Key': apiKey
-                    }
-                });
-                const data = await response.json();
-                displayWeather(data);
-            } catch (error) {
-                document.getElementById('weather').innerText = 'Не удалось загрузить данные о погоде';
-                console.error('Ошибка при получении данных о погоде:', error);
-            }
+        async function fetchWeather() {
+            const response = await fetch(`https://api.gismeteo.net/v2/weather/current/?city=${city}&apikey=${apiKey}`);
+            const data = await response.json();
+            return data;
         }
 
-        // Отображаем данные о погоде на странице
-        function displayWeather(data) {
-            const weatherDiv = document.getElementById('weather');
-            const temperature = data.fact.temp;
-            const condition = data.fact.condition;
-            weatherDiv.innerHTML = `Температура: ${temperature}°C<br>Условия: ${condition}`;
+        function updateWeather() {
+            fetchWeather().then(data => {
+                document.querySelector('#weather h2').textContent = `Погода в ${city}`;
+                document.getElementById('description').textContent = data.response.description;
+                document.getElementById('temperature').textContent = `Температура: ${data.response.temp.c}°C`;
+            }).catch(error => {
+                console.error('Ошибка получения данных о погоде:', error);
+                document.querySelector('#weather h2').textContent = 'Ошибка';
+                document.getElementById('description').textContent = 'Не удалось загрузить данные о погоде.';
+                document.getElementById('temperature').textContent = '';
+            });
         }
 
-        // Загружаем данные о погоде при загрузке страницы
-        window.onload = getWeather;
-
-        // Интеграция с Telegram Bot Web Apps
-        window.Telegram.WebApp.ready();
-
-        function sendWeatherToTelegram() {
-            Telegram.WebApp.sendData(JSON.stringify({
-                temperature: document.getElementById('weather').innerText
-            }));
-        }
-
-        // Отправляем данные в Telegram при открытии Web App
-        Telegram.WebApp.onEvent('viewportChanged', sendWeatherToTelegram);
+        updateWeather();
     </script>
 </body>
 </html>
