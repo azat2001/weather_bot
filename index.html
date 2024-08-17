@@ -7,56 +7,71 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f0f8ff;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;
+            background-color: #f0f0f0;
         }
-        #weather {
-            text-align: center;
-            background: #fff;
+        .weather {
+            background-color: #fff;
             padding: 20px;
-            border-radius: 10px;
+            border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
         }
-        h2 {
-            margin: 0 0 10px 0;
+        .weather h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .weather p {
+            font-size: 18px;
+            margin: 5px 0;
         }
     </style>
 </head>
 <body>
-    <div id="weather">
-        <h2>Загрузка...</h2>
-        <p id="description"></p>
-        <p id="temperature"></p>
-    </div>
 
-    <script>
-        const apiKey = '56b30cb255.3443075';  // Замените ВАШ_API_КЛЮЧ на ваш реальный API-ключ
-        const city = 'Moscow';  // Укажите нужный город
+<div class="weather" id="weather">
+    <h1>Погода</h1>
+    <p>Загрузка...</p>
+</div>
 
-        async function fetchWeather() {
-            const response = await fetch(`https://api.gismeteo.net/v2/weather/current/?city=${city}&apikey=${apiKey}`);
-            const data = await response.json();
-            return data;
-        }
+<script>
+    async function fetchWeather() {
+        const apiKey = '56b30cb255.3443075';
+        const cityId = '5159';  // Замените на ID вашего города
+        const url = `https://api.gismeteo.net/v2/weather/current/${cityId}/?lang=ru`;
 
-        function updateWeather() {
-            fetchWeather().then(data => {
-                document.querySelector('#weather h2').textContent = `Погода в ${city}`;
-                document.getElementById('description').textContent = data.response.description;
-                document.getElementById('temperature').textContent = `Температура: ${data.response.temp.c}°C`;
-            }).catch(error => {
-                console.error('Ошибка получения данных о погоде:', error);
-                document.querySelector('#weather h2').textContent = 'Ошибка';
-                document.getElementById('description').textContent = 'Не удалось загрузить данные о погоде.';
-                document.getElementById('temperature').textContent = '';
+        try {
+            const response = await fetch(url, {
+                headers: {
+                    'X-Gismeteo-Token': apiKey
+                }
             });
-        }
 
-        updateWeather();
-    </script>
+            if (!response.ok) {
+                throw new Error('Ошибка сети');
+            }
+
+            const data = await response.json();
+            console.log(data); // Для отладки
+
+            const weatherDiv = document.getElementById('weather');
+            weatherDiv.innerHTML = `
+                <h1>Погода в ${data.name}</h1>
+                <p>Температура: ${data.temperature.air.C}°C</p>
+                <p>Состояние: ${data.description.full}</p>
+                <p>Влажность: ${data.humidity.percent}%</p>
+            `;
+        } catch (error) {
+            console.error('Ошибка получения данных:', error);
+            document.getElementById('weather').innerHTML = '<p>Не удалось загрузить данные</p>';
+        }
+    }
+
+    fetchWeather();
+</script>
+
 </body>
 </html>
