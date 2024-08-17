@@ -4,74 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Погода</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f0f0f0;
-        }
-        .weather {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-        .weather h1 {
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
-        .weather p {
-            font-size: 18px;
-            margin: 5px 0;
-        }
-    </style>
 </head>
 <body>
+    <h1>Текущая погода</h1>
+    <div id="weather">
+        Загрузка...
+    </div>
 
-<div class="weather" id="weather">
-    <h1>Погода</h1>
-    <p>Загрузка...</p>
-</div>
-
-<script>
-    async function fetchWeather() {
-        const apiKey = '56b30cb255.3443075';
-        const cityId = '5159';  // Замените на ID вашего города
-        const url = `https://api.gismeteo.net/v2/weather/current/${cityId}/?lang=ru`;
-
-        try {
-            const response = await fetch(url, {
-                headers: {
-                    'X-Gismeteo-Token': apiKey
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error('Ошибка сети');
-            }
-
-            const data = await response.json();
-            console.log(data); // Для отладки
-
-            const weatherDiv = document.getElementById('weather');
-            weatherDiv.innerHTML = `
-                <h1>Погода в ${data.name}</h1>
-                <p>Температура: ${data.temperature.air.C}°C</p>
-                <p>Состояние: ${data.description.full}</p>
-                <p>Влажность: ${data.humidity.percent}%</p>
-            `;
-        } catch (error) {
-            console.error('Ошибка получения данных:', error);
-            document.getElementById('weather').innerHTML = '<p>Не удалось загрузить данные</p>';
-        }
-    }
-
-    fetchWeather();
-</script>
-
+    <script src="script.js"></script>
 </body>
 </html>
